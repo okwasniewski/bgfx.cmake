@@ -35,6 +35,11 @@ if( WIN32 )
 	target_link_libraries( bx PUBLIC psapi )
 endif()
 
+# For Windows Store, consume WinRT libraries
+if ( WINDOWS_STORE )
+	target_compile_options( bx PUBLIC /ZW )
+endif()
+
 # Add include directory of bx
 target_include_directories( bx PUBLIC ${BX_DIR}/include ${BX_DIR}/3rdparty )
 
@@ -51,6 +56,11 @@ endif()
 target_compile_definitions( bx PUBLIC "__STDC_LIMIT_MACROS" )
 target_compile_definitions( bx PUBLIC "__STDC_FORMAT_MACROS" )
 target_compile_definitions( bx PUBLIC "__STDC_CONSTANT_MACROS" )
+
+# Windows Store specific
+if ( WINDOWS_STORE )
+	target_compile_definitions( bx PUBLIC "_CRT_SECURE_NO_WARNINGS" )
+endif ()
 
 target_compile_definitions( bx PRIVATE "$<$<CONFIG:Debug>:BX_CONFIG_DEBUG=1>" )
 if(BGFX_CONFIG_DEBUG)

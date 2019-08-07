@@ -16,8 +16,12 @@ include( cmake/3rdparty/etc1.cmake )
 include( cmake/3rdparty/etc2.cmake )
 include( cmake/3rdparty/iqa.cmake )
 include( cmake/3rdparty/libsquish.cmake )
-include( cmake/3rdparty/nvtt.cmake )
 include( cmake/3rdparty/pvrtc.cmake )
+
+# NVTT has not been made compatible with Windows Store builds
+if (NOT WINDOWS_STORE )
+	include( cmake/3rdparty/nvtt.cmake )
+endif ()
 
 # Ensure the directory exists
 if( NOT IS_DIRECTORY ${BIMG_DIR} )
