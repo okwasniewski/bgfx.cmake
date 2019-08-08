@@ -37,7 +37,7 @@ endif()
 
 # For Windows Store, consume WinRT libraries
 if ( WINDOWS_STORE )
-	target_compile_options( bx PUBLIC /ZW )
+	target_compile_options( bx PRIVATE /ZW )
 endif()
 
 # Add include directory of bx
@@ -59,7 +59,7 @@ target_compile_definitions( bx PUBLIC "__STDC_CONSTANT_MACROS" )
 
 # Windows Store specific
 if ( WINDOWS_STORE )
-	target_compile_definitions( bx PUBLIC "_CRT_SECURE_NO_WARNINGS" )
+	target_compile_definitions( bx PRIVATE "_CRT_SECURE_NO_WARNINGS" )
 endif ()
 
 target_compile_definitions( bx PRIVATE "$<$<CONFIG:Debug>:BX_CONFIG_DEBUG=1>" )

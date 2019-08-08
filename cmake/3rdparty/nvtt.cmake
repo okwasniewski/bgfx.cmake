@@ -31,3 +31,8 @@ add_library( nvtt STATIC ${NVTT_SOURCES} )
 target_include_directories( nvtt PUBLIC ${BIMG_DIR}/3rdparty ${BIMG_DIR}/3rdparty/nvtt )
 set_target_properties( nvtt PROPERTIES FOLDER "bgfx/3rdparty" )
 target_link_libraries( nvtt PUBLIC bx )
+
+# Automatically-enabled SDL errors cause NVTT to fail for Windows Store
+if ( WINDOWS_STORE )
+	target_compile_options( nvtt PRIVATE /sdl- )
+endif()
