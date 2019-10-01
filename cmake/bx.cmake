@@ -41,15 +41,19 @@ if ( WINDOWS_STORE )
 endif()
 
 # Add include directory of bx
-target_include_directories( bx PUBLIC ${BX_DIR}/include ${BX_DIR}/3rdparty )
+target_include_directories( bx
+	PUBLIC
+		$<BUILD_INTERFACE:${BX_DIR}/include>
+		$<BUILD_INTERFACE:${BX_DIR}/3rdparty>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Build system specific configurations
 if( MSVC )
-	target_include_directories( bx PUBLIC ${BX_DIR}/include/compat/msvc )
+	target_include_directories( bx PUBLIC $<BUILD_INTERFACE:${BX_DIR}/include/compat/msvc> )
 elseif( MINGW )
-	target_include_directories( bx PUBLIC ${BX_DIR}/include/compat/mingw )
+	target_include_directories( bx PUBLIC $<BUILD_INTERFACE:${BX_DIR}/include/compat/mingw> )
 elseif( APPLE )
-	target_include_directories( bx PUBLIC ${BX_DIR}/include/compat/osx )
+	target_include_directories( bx PUBLIC $<BUILD_INTERFACE:${BX_DIR}/include/compat/osx> )
 endif()
 
 # All configurations
@@ -68,7 +72,7 @@ if(BGFX_CONFIG_DEBUG)
 endif()
 
 # Additional dependencies on Unix
-if( UNIX AND NOT APPLE )
+if( UNIX AND NOT APPLE AND NOT ANDROID )
 	# Threads
 	find_package( Threads )
 	target_link_libraries( bx ${CMAKE_THREAD_LIBS_INIT} dl )
