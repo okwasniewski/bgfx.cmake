@@ -85,10 +85,6 @@ elseif(APPLE)
 	target_link_libraries( bx PUBLIC ${FOUNDATION_LIBRARY} )
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-      target_link_options(bx PRIVATE /ignore:4264)
-endif()
-
 # Put in a "bgfx" folder in Visual Studio
 set_target_properties( bx PROPERTIES FOLDER "bgfx" )
 
