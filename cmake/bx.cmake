@@ -35,8 +35,13 @@ if( WIN32 )
 	target_link_libraries( bx PUBLIC psapi )
 endif()
 
-# For Windows Store, consume WinRT libraries
-if ( WINDOWS_STORE )
+# Avoid consuming the windows runtime library for winrt c++ projects
+if ( WINDOWS_WINRT_NO_RUNTIME )
+	target_compile_definitions( bx PRIVATE "WINDOWS_WINRT_NO_RUNTIME" )
+endif()
+
+# For Windows Store apps not using winrt c++ support, consume WinRT libraries
+if ( WINDOWS_STORE AND NOT WINDOWS_USE_WINRT_CPP )
 	target_compile_options( bx PRIVATE /ZW )
 endif()
 
