@@ -41,7 +41,7 @@ if ( WINDOWS_WINRT_NO_RUNTIME )
 endif()
 
 # For Windows Store apps not using winrt c++ support, consume WinRT libraries
-if ( WINDOWS_STORE AND NOT WINDOWS_USE_WINRT_CPP )
+if ( WINDOWS_STORE AND NOT WINDOWS_WINRT_NO_RUNTIME )
 	target_compile_options( bx PRIVATE /ZW )
 endif()
 
