@@ -35,11 +35,6 @@ if( WIN32 )
 	target_link_libraries( bx PUBLIC psapi )
 endif()
 
-# Avoid consuming the windows runtime library for winrt c++ projects
-if ( WINDOWS_WINRT_NO_RUNTIME )
-	target_compile_definitions( bx PRIVATE "WINDOWS_WINRT_NO_RUNTIME" )
-endif()
-
 # Add include directory of bx
 target_include_directories( bx
 	PUBLIC
