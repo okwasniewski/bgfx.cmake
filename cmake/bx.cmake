@@ -35,11 +35,6 @@ if( WIN32 )
 	target_link_libraries( bx PUBLIC psapi )
 endif()
 
-# For Windows Store, consume WinRT libraries
-if ( WINDOWS_STORE )
-	target_compile_options( bx PRIVATE /ZW )
-endif()
-
 # Add include directory of bx
 target_include_directories( bx
 	PUBLIC
