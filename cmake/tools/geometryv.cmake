@@ -8,12 +8,14 @@
 # You should have received a copy of the CC0 Public Domain Dedication along with
 # this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-if( TARGET squish )
-	return()
+add_executable( geometryv ${BGFX_DIR}/tools/geometryv/geometryv.cpp )
+set_target_properties( geometryv PROPERTIES FOLDER "bgfx/tools" )
+target_link_libraries( geometryv example-common )
+if( BGFX_CUSTOM_TARGETS )
+	add_dependencies( tools geometryv )
 endif()
 
-file( GLOB SQUISH_SOURCES ${BIMG_DIR}/3rdparty/libsquish/*.cpp ${BIMG_DIR}/3rdparty/libsquish/*.h ${BIMG_DIR}/3rdparty/libsquish/*.inl )
-
-add_library( squish STATIC ${SQUISH_SOURCES} )
-target_include_directories( squish PUBLIC $<BUILD_INTERFACE:${BIMG_DIR}/3rdparty> )
-set_target_properties( squish PROPERTIES FOLDER "bgfx/3rdparty" )
+if (IOS)
+	set_target_properties(geometryv PROPERTIES MACOSX_BUNDLE ON
+										      MACOSX_BUNDLE_GUI_IDENTIFIER geometryv)
+endif()
