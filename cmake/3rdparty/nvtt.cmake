@@ -35,6 +35,7 @@ target_include_directories( nvtt
 set_target_properties( nvtt PROPERTIES FOLDER "bgfx/3rdparty" )
 target_link_libraries( nvtt PUBLIC bx )
 
+
 # Automatically-enabled SDL errors cause NVTT to fail for Windows Store
 if ( WINDOWS_STORE )
 	target_compile_options( nvtt PRIVATE /sdl- )
@@ -47,3 +48,4 @@ if( BGFX_INSTALL )
 		EXPORT bgfx-config
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
+

@@ -18,7 +18,6 @@ include( cmake/3rdparty/iqa.cmake )
 include( cmake/3rdparty/libsquish.cmake )
 include( cmake/3rdparty/nvtt.cmake )
 include( cmake/3rdparty/pvrtc.cmake )
-include( cmake/3rdparty/tinyexr.cmake )
 
 # Ensure the directory exists
 if( NOT IS_DIRECTORY ${BIMG_DIR} )
@@ -39,7 +38,12 @@ target_include_directories( bimg
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # bimg dependencies
-target_link_libraries( bimg PUBLIC bx PRIVATE astc-codec astc edtaa3 etc1 etc2 iqa squish nvtt pvrtc tinyexr )
+target_link_libraries( bimg bx astc-codec astc edtaa3 etc1 etc2 iqa squish nvtt pvrtc )
 
 # Put in a "bgfx" folder in Visual Studio
 set_target_properties( bimg PROPERTIES FOLDER "bgfx" )
+
+# Export debug build as "bimgd"
+if( BGFX_USE_DEBUG_SUFFIX )
+	set_target_properties( bimg PROPERTIES OUTPUT_NAME_DEBUG "bimgd" )
+endif()

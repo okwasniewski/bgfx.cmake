@@ -134,7 +134,7 @@ function( add_example ARG_NAME )
 	if( ARG_COMMON )
 		add_library( example-${ARG_NAME} STATIC EXCLUDE_FROM_ALL ${SOURCES} )
 		target_include_directories( example-${ARG_NAME} PUBLIC ${BGFX_DIR}/examples/common )
-		target_link_libraries( example-${ARG_NAME} PUBLIC bgfx bx bimg dear-imgui meshoptimizer )
+		target_link_libraries( example-${ARG_NAME} PUBLIC bgfx dear-imgui meshoptimizer )
 		if( BGFX_WITH_GLFW )
 			find_package( glfw3 REQUIRED )
 			target_link_libraries( example-${ARG_NAME} PUBLIC glfw )
@@ -268,12 +268,7 @@ if( BGFX_BUILD_EXAMPLES )
 #		37-gpudrivenrendering
 		38-bloom
 		39-assao
-		40-svt
-#		41-tess
-		42-bunnylod
-		43-denoise
-		44-sss
-		45-bokeh
+#		40-svt
 	)
 
 	foreach( EXAMPLE ${BGFX_EXAMPLES} )

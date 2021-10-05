@@ -35,31 +35,20 @@ if( WIN32 )
 	target_link_libraries( bx PUBLIC psapi )
 endif()
 
-include(GNUInstallDirs)
-
 # Add include directory of bx
 target_include_directories( bx
 	PUBLIC
 		$<BUILD_INTERFACE:${BX_DIR}/include>
 		$<BUILD_INTERFACE:${BX_DIR}/3rdparty>
-		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Build system specific configurations
-if( MINGW )
-	target_include_directories( bx
-		PUBLIC
-		    $<BUILD_INTERFACE:${BX_DIR}/include/compat/mingw>
-		    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/compat/mingw> )
-elseif( WIN32 )
-	target_include_directories( bx
-		PUBLIC
-			$<BUILD_INTERFACE:${BX_DIR}/include/compat/msvc>
-			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/compat/msvc> )
+if( MSVC )
+	target_include_directories( bx PUBLIC $<BUILD_INTERFACE:${BX_DIR}/include/compat/msvc> )
+elseif( MINGW )
+	target_include_directories( bx PUBLIC $<BUILD_INTERFACE:${BX_DIR}/include/compat/mingw> )
 elseif( APPLE )
-	target_include_directories( bx
-		PUBLIC
-		    $<BUILD_INTERFACE:${BX_DIR}/include/compat/osx>
-		    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/compat/osx> )
+	target_include_directories( bx PUBLIC $<BUILD_INTERFACE:${BX_DIR}/include/compat/osx> )
 endif()
 
 # All configurations
@@ -93,3 +82,8 @@ endif()
 
 # Put in a "bgfx" folder in Visual Studio
 set_target_properties( bx PROPERTIES FOLDER "bgfx" )
+
+# Export debug build as "bxd"
+if( BGFX_USE_DEBUG_SUFFIX )
+	set_target_properties( bx PROPERTIES OUTPUT_NAME_DEBUG "bxd" )
+endif()
