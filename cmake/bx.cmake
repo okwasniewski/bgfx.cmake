@@ -62,8 +62,11 @@ if ( WINDOWS_STORE )
 endif ()
 
 target_compile_definitions( bx PRIVATE "$<$<CONFIG:Debug>:BX_CONFIG_DEBUG=1>" )
-if(BGFX_CONFIG_DEBUG)
-	target_compile_definitions( bx PRIVATE BX_CONFIG_DEBUG=1)
+
+if (BGFX_CONFIG_DEBUG)
+	target_compile_definitions( bx PUBLIC "BX_CONFIG_DEBUG=1" )
+else()
+	target_compile_definitions( bx PUBLIC "BX_CONFIG_DEBUG=0" )
 endif()
 
 # Additional dependencies on Unix
