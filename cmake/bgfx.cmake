@@ -37,12 +37,6 @@ endif()
 # Create the bgfx target
 add_library( bgfx ${BGFX_SOURCES} )
 
-# Enable BGFX_CONFIG_DEBUG in Debug configuration
-target_compile_definitions( bgfx PRIVATE "$<$<CONFIG:Debug>:BGFX_CONFIG_DEBUG=1>" )
-if(BGFX_CONFIG_DEBUG)
-	target_compile_definitions( bgfx PRIVATE BGFX_CONFIG_DEBUG=1)
-endif()
-
 if( NOT ${BGFX_OPENGL_VERSION} STREQUAL "" )
 	target_compile_definitions( bgfx PRIVATE BGFX_CONFIG_RENDERER_OPENGL=${BGFX_OPENGL_VERSION})
 endif()
@@ -51,6 +45,14 @@ endif()
 if( MSVC )
 	target_compile_definitions( bgfx PRIVATE "_CRT_SECURE_NO_WARNINGS" )
 endif()
+
+# Add debug config required in bx headers since bx is private
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    target_compile_definitions( bgfx PUBLIC "BX_CONFIG_DEBUG=1" )
+else()
+    target_compile_definitions( bgfx PUBLIC "BX_CONFIG_DEBUG=0" )
+endif()
+
 
 # Includes
 target_include_directories( bgfx
