@@ -93,7 +93,12 @@ if( UNIX AND NOT APPLE AND NOT EMSCRIPTEN AND NOT ANDROID )
 	#find_package(Threads REQUIRED)
 	#find_library(LIBRT_LIBRARIES rt)
 	#find_library(LIBDL_LIBRARIES dl)
-	target_link_libraries( bgfx PUBLIC ${X11_LIBRARIES} ${OPENGL_LIBRARIES})
+	target_link_libraries( bgfx PUBLIC ${X11_LIBRARIES} )
+	if( BGFX_OPENGL_USE_EGL )
+		target_link_libraries( bgfx PUBLIC OpenGL::OpenGL OpenGL::EGL )
+	else()
+		target_link_libraries( bgfx PUBLIC OpenGL::GL )
+	endif()
 endif()
 
 # Exclude mm files if not on OS X
