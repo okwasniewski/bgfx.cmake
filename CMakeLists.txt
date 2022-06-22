@@ -16,13 +16,19 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# __cplusplus value is not in sync with language version used. MVSC needs this flag to update it accordingly
+# https://gitlab.kitware.com/cmake/cmake/-/issues/18837
+if (MSVC)
+    add_compile_options(/Zc:__cplusplus)
+  endif()
+
 if( APPLE AND NOT IOS )
 	set( CMAKE_CXX_FLAGS "-ObjC++" )
 endif()
 
-option( BGFX_BUILD_TOOLS                "Build bgfx tools."                             ON  )
+option( BGFX_BUILD_TOOLS                "Build bgfx tools."                             OFF  )
 option( BGFX_BUILD_EXAMPLES             "Build bgfx examples."                          ON  )
-option( BGFX_INSTALL                    "Create installation target."                   ON  )
+option( BGFX_INSTALL                    "Create installation target."                   OFF  )
 option( BGFX_INSTALL_EXAMPLES           "Install examples and their runtimes."          OFF )
 option( BGFX_CUSTOM_TARGETS             "Include convenience custom targets."           ON  )
 option( BGFX_AMALGAMATED                "Amalgamated bgfx build for faster compilation" OFF )
