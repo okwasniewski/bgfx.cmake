@@ -20,18 +20,15 @@ if( APPLE AND NOT IOS )
 	set( CMAKE_CXX_FLAGS "-ObjC++" )
 endif()
 
-option( BGFX_BUILD_TOOLS            "Build bgfx tools."                             ON  )
-option( BGFX_BUILD_EXAMPLES         "Build bgfx examples."                          ON  )
-option( BGFX_INSTALL                "Create installation target."                   ON  )
-option( BGFX_INSTALL_EXAMPLES       "Install examples and their runtimes."          OFF )
-option( BGFX_CUSTOM_TARGETS         "Include convenience custom targets."           ON  )
-option( BGFX_USE_OVR                "Build with OVR support."                       OFF )
-option( BGFX_AMALGAMATED            "Amalgamated bgfx build for faster compilation" OFF )
-option( BX_AMALGAMATED              "Amalgamated bx build for faster compilation"   OFF )
-option( BGFX_CONFIG_DEBUG           "Enables debug configuration on all builds"     OFF )
-option( BGFX_USE_DEBUG_SUFFIX       "Add 'd' suffix to debug output targets"        ON  )
-option( BGFX_CONFIG_RENDERER_WEBGPU "Enables the webgpu renderer"                   OFF )
-option( BGFX_OPENGL_USE_EGL         "Use EGL targets for OpenGL"                    OFF )
+option( BGFX_BUILD_TOOLS                "Build bgfx tools."                             ON  )
+option( BGFX_BUILD_EXAMPLES             "Build bgfx examples."                          ON  )
+option( BGFX_INSTALL                    "Create installation target."                   ON  )
+option( BGFX_INSTALL_EXAMPLES           "Install examples and their runtimes."          OFF )
+option( BGFX_CUSTOM_TARGETS             "Include convenience custom targets."           ON  )
+option( BGFX_AMALGAMATED                "Amalgamated bgfx build for faster compilation" OFF )
+option( BX_AMALGAMATED                  "Amalgamated bx build for faster compilation"   OFF )
+option( BGFX_CONFIG_MULTITHREADED       "Build bgfx with multithreaded configuration"   ON )
+option( BGFX_CONFIG_RENDERER_WEBGPU     "Enables the webgpu renderer"                   OFF )
 
 set( BGFX_OPENGL_VERSION   ""       CACHE STRING "Specify minimum opengl version" )
 set( BGFX_OPENGLES_VERSION ""       CACHE STRING "Specify minimum OpenGL ES version" )
@@ -59,21 +56,20 @@ elseif( NOT IS_ABSOLUTE "${BGFX_DIR}")
 	get_filename_component(BGFX_DIR "${BGFX_DIR}" REALPATH BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
-if( BGFX_USE_OVR )
-	include( cmake/ovr.cmake )
-endif()
+# sets project version from api ver / git rev
+include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.cmake )
 
-include( cmake/shared.cmake )
-include( cmake/bx.cmake )
-include( cmake/bimg.cmake )
-include( cmake/bgfx.cmake )
+include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/shared.cmake )
+include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/bx.cmake )
+include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/bimg.cmake )
+include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/bgfx.cmake )
 
 if( BGFX_BUILD_TOOLS )
-	include( cmake/tools.cmake )
+	include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tools.cmake )
 endif()
 
-if( BGFX_BUILD_EXAMPLES )
-	include( cmake/examples.cmake )
+if( BGFX_BUILD_TOOLS OR BGFX_BUILD_EXAMPLES )
+	include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/examples.cmake )
 endif()
 
 if( BGFX_INSTALL )
@@ -85,11 +81,40 @@ if( BGFX_INSTALL )
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 	install( DIRECTORY ${BX_DIR}/include DESTINATION . )
 
-	# install bimg
-	install( TARGETS bimg
-		EXPORT bgfx-config
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} )
-	install( DIRECTORY ${BIMG_DIR}/include DESTINATION . )
+	# Configuration
+	set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+	set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+	set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+	set(namespace "${PROJECT_NAME}::")
+
+	# Include module with fuction 'write_basic_package_version_file'
+	include(CMakePackageConfigHelpers)
+
+	# Configure '<PROJECT-NAME>ConfigVersion.cmake'
+	# Use:
+	#   * PROJECT_VERSION
+	if(${CMAKE_VERSION} VERSION_LESS "3.11.0")
+		set(BGFX_COMPATIBILITY SameMajorVersion)
+	else()
+		set(BGFX_COMPATIBILITY SameMinorVersion)
+	endif()
+	write_basic_package_version_file(
+		"${version_config}"
+		VERSION ${PROJECT_VERSION}
+		COMPATIBILITY ${BGFX_COMPATIBILITY}
+	)
+
+	# Configure '<PROJECT-NAME>Config.cmake'
+	# Use variables:
+	#   * TARGETS_EXPORT_NAME
+	#   * PROJECT_NAME
+	configure_package_config_file(
+		"${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in"
+		"${project_config}"
+		INSTALL_DESTINATION "${config_install_dir}"
+	)
+
+	install(FILES ${BGFX_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licences/${PROJECT_NAME})
 
 	# install bgfx
 	install( TARGETS bgfx

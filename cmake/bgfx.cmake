@@ -35,7 +35,21 @@ else()
 endif()
 
 # Create the bgfx target
-add_library( bgfx ${BGFX_SOURCES} )
+if(BGFX_LIBRARY_TYPE STREQUAL STATIC)
+    add_library( bgfx STATIC ${BGFX_SOURCES} )
+else()
+    add_library( bgfx SHARED ${BGFX_SOURCES} )
+endif()
+
+if(BGFX_CONFIG_RENDERER_WEBGPU)
+    include(${CMAKE_CURRENT_LIST_DIR}/3rdparty/webgpu.cmake)
+    target_compile_definitions( bgfx PRIVATE BGFX_CONFIG_RENDERER_WEBGPU=1)
+    if (EMSCRIPTEN)
+        target_link_options(bgfx PRIVATE "-s USE_WEBGPU=1")
+    else()
+        target_link_libraries(bgfx PRIVATE webgpu)
+    endif()
+endif()
 
 if( NOT ${BGFX_OPENGL_VERSION} STREQUAL "" )
 	target_compile_definitions( bgfx PRIVATE BGFX_CONFIG_RENDERER_OPENGL=${BGFX_OPENGL_VERSION})
@@ -47,7 +61,7 @@ if( MSVC )
 endif()
 
 # Add debug config required in bx headers since bx is private
-target_compile_definitions( bgfx PRIVATE "$<$<CONFIG:Debug>:BGFX_CONFIG_DEBUG=1>" )
+target_compile_definitions( bgfx PRIVATE "$<$<CONFIG:Debug>:BGFX_CONFIG_DEBUG=1>" "BGFX_CONFIG_MULTITHREADED=$<BOOL:${BGFX_CONFIG_MULTITHREADED}>")
 if (BGFX_CONFIG_DEBUG)
     target_compile_definitions( bgfx PUBLIC "BX_CONFIG_DEBUG=1" )
 else()
@@ -68,22 +82,22 @@ target_include_directories( bgfx
 # bgfx depends on bx and bimg
 target_link_libraries( bgfx PUBLIC bx bimg )
 
-# ovr support
-if( BGFX_USE_OVR )
-	target_link_libraries( bgfx PUBLIC ovr )
-endif()
-
-# Frameworks required on iOS and macOS
-if( IOS )
-	target_link_libraries (bgfx PUBLIC "-framework OpenGLES  -framework Metal -framework UIKit -framework CoreGraphics -framework QuartzCore")
+# Frameworks required on iOS, tvOS and macOS
+if( ${CMAKE_SYSTEM_NAME} MATCHES iOS|tvOS )
+	target_link_libraries (bgfx PUBLIC 
+		"-framework OpenGLES -framework Metal -framework UIKit -framework CoreGraphics -framework QuartzCore -framework IOKit -framework CoreFoundation")
 elseif( APPLE )
 	find_library( COCOA_LIBRARY Cocoa )
 	find_library( METAL_LIBRARY Metal )
 	find_library( QUARTZCORE_LIBRARY QuartzCore )
+	find_library( IOKIT_LIBRARY IOKit )
+	find_library( COREFOUNDATION_LIBRARY CoreFoundation )
 	mark_as_advanced( COCOA_LIBRARY )
 	mark_as_advanced( METAL_LIBRARY )
 	mark_as_advanced( QUARTZCORE_LIBRARY )
-	target_link_libraries( bgfx PUBLIC ${COCOA_LIBRARY} ${METAL_LIBRARY} ${QUARTZCORE_LIBRARY} )
+	mark_as_advanced( IOKIT_LIBRARY )
+	mark_as_advanced( COREFOUNDATION_LIBRARY )
+	target_link_libraries( bgfx PUBLIC ${COCOA_LIBRARY} ${METAL_LIBRARY} ${QUARTZCORE_LIBRARY} ${IOKIT_LIBRARY} ${COREFOUNDATION_LIBRARY} )
 endif()
 
 if( UNIX AND NOT APPLE AND NOT EMSCRIPTEN AND NOT ANDROID )
