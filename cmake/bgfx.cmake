@@ -59,6 +59,33 @@ if( NOT ${BGFX_OPENGL_VERSION} STREQUAL "" )
 	target_compile_definitions( bgfx PRIVATE BGFX_CONFIG_RENDERER_OPENGL=${BGFX_OPENGL_VERSION})
 endif()
 
+if( NOT ${BGFX_CONFIG_DEFAULT_MAX_ENCODERS} STREQUAL "" )
+	target_compile_definitions( bgfx
+		PUBLIC
+				"BGFX_CONFIG_DEFAULT_MAX_ENCODERS=$<IF:$<BOOL:${BGFX_CONFIG_MULTITHREADED}>,${BGFX_CONFIG_DEFAULT_MAX_ENCODERS},1>" )
+endif()
+
+set(BGFX_CONFIG_OPTIONS "")
+list(APPEND BGFX_CONFIG_OPTIONS
+	"BGFX_CONFIG_MAX_DRAW_CALLS"
+	"BGFX_CONFIG_MAX_VIEWS"
+	"BGFX_CONFIG_MAX_FRAME_BUFFERS"
+	"BGFX_CONFIG_MAX_VERTEX_LAYOUTS"
+	"BGFX_CONFIG_MAX_VERTEX_BUFFERS"
+	"BGFX_CONFIG_MAX_DYNAMIC_VERTEX_BUFFERS"
+	"BGFX_CONFIG_MAX_INDEX_BUFFERS"
+	"BGFX_CONFIG_MAX_DYNAMIC_INDEX_BUFFERS"
+	"BGFX_CONFIG_MAX_TEXTURES"
+	"BGFX_CONFIG_MAX_TEXTURE_SAMPLERS"
+	"BGFX_CONFIG_MAX_SHADERS"
+	"BGFX_CONFIG_SORT_KEY_NUM_BITS_PROGRAM"
+)
+foreach(BGFX_CONFIG_OPTION IN LISTS BGFX_CONFIG_OPTIONS)
+	if( NOT ${${BGFX_CONFIG_OPTION}} STREQUAL "" )
+		target_compile_definitions( bgfx PUBLIC "${BGFX_CONFIG_OPTION}=${${BGFX_CONFIG_OPTION}}" )
+	endif()
+endforeach()
+
 # Special Visual Studio Flags
 if( MSVC )
 	target_compile_definitions( bgfx PRIVATE "_CRT_SECURE_NO_WARNINGS" )
@@ -73,11 +100,24 @@ else()
 endif()
 
 
+# directx-headers
+set (DIRECTX_HEADERS)
+if (UNIX AND NOT APPLE AND NOT EMSCRIPTEN AND NOT ANDROID)  # Only Linux
+	set (DIRECTX_HEADERS 
+		${BGFX_DIR}/3rdparty/directx-headers/include/directx
+		${BGFX_DIR}/3rdparty/directx-headers/include
+		${BGFX_DIR}/3rdparty/directx-headers/include/wsl/stubs )
+elseif (WIN32)  # Only Windows
+	set (DIRECTX_HEADERS 
+		${BGFX_DIR}/3rdparty/directx-headers/include/directx
+		${BGFX_DIR}/3rdparty/directx-headers/include )
+endif()
+
 # Includes
 target_include_directories( bgfx
 	PRIVATE
+		${DIRECTX_HEADERS}
 		${BGFX_DIR}/3rdparty
-		${BGFX_DIR}/3rdparty/dxsdk/include
 		${BGFX_DIR}/3rdparty/khronos
 	PUBLIC
 		$<BUILD_INTERFACE:${BGFX_DIR}/include>

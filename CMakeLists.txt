@@ -26,7 +26,14 @@ if( APPLE AND NOT IOS )
 	set( CMAKE_CXX_FLAGS "-ObjC++" )
 endif()
 
-option( BGFX_BUILD_TOOLS                "Build bgfx tools."                             OFF  )
+if (MSVC AND (MSVC_VERSION GREATER_EQUAL 1914))
+    add_compile_options("/Zc:__cplusplus")
+endif()
+
+option( BGFX_BUILD_TOOLS                "Build bgfx tools."                             ON  )
+option( BGFX_BUILD_TOOLS_SHADER         "Build bgfx shader tools."                      ON  )
+option( BGFX_BUILD_TOOLS_GEOMETRY       "Build bgfx geometry tools."                    ON  )
+option( BGFX_BUILD_TOOLS_TEXTURE        "Build bgfx texture tools."                     ON  )
 option( BGFX_BUILD_EXAMPLES             "Build bgfx examples."                          ON  )
 option( BGFX_INSTALL                    "Create installation target."                   OFF  )
 option( BGFX_INSTALL_EXAMPLES           "Install examples and their runtimes."          OFF )
@@ -40,6 +47,20 @@ option( BX_CONFIG_DEBUG                 "Log debug messages (default: on in debu
 set( BGFX_OPENGL_VERSION   ""       CACHE STRING "Specify minimum opengl version" )
 set( BGFX_OPENGLES_VERSION ""       CACHE STRING "Specify minimum OpenGL ES version" )
 set( BGFX_LIBRARY_TYPE     "STATIC" CACHE STRING "Linking type for library" )
+
+set( BGFX_CONFIG_DEFAULT_MAX_ENCODERS             "" CACHE STRING "Specify default maximum encoder count (multithreaded only)" )
+set( BGFX_CONFIG_MAX_DRAW_CALLS                   "" CACHE STRING "Specify maximum draw calls" )
+set( BGFX_CONFIG_MAX_VIEWS                        "" CACHE STRING "Specify maximum view count (should be a power of two)" )
+set( BGFX_CONFIG_MAX_FRAME_BUFFERS                "" CACHE STRING "Specify maximum frame buffers" )
+set( BGFX_CONFIG_MAX_VERTEX_LAYOUTS               "" CACHE STRING "Specify maximum vertex layouts" )
+set( BGFX_CONFIG_MAX_VERTEX_BUFFERS               "" CACHE STRING "Specify maximum vertex buffer count" )
+set( BGFX_CONFIG_MAX_DYNAMIC_VERTEX_BUFFERS       "" CACHE STRING "Specify maximum dynamic vertex buffer count" )
+set( BGFX_CONFIG_MAX_INDEX_BUFFERS                "" CACHE STRING "Specify maximum index buffer count" )
+set( BGFX_CONFIG_MAX_DYNAMIC_INDEX_BUFFERS        "" CACHE STRING "Specify maximum dynamic index buffer count" )
+set( BGFX_CONFIG_MAX_TEXTURES                     "" CACHE STRING "Specify maximum texture count" )
+set( BGFX_CONFIG_MAX_TEXTURE_SAMPLERS             "" CACHE STRING "Specify maximum texture samplers" )
+set( BGFX_CONFIG_MAX_SHADERS                      "" CACHE STRING "Specify shader count" )
+set( BGFX_CONFIG_SORT_KEY_NUM_BITS_PROGRAM        "" CACHE STRING "Specify maximum program count as 2^(program bits)" )
 
 set_property( CACHE BGFX_LIBRARY_TYPE PROPERTY STRINGS STATIC SHARED )
 
@@ -125,9 +146,30 @@ if( BGFX_INSTALL )
 
 	# install bgfx
 	install( TARGETS bgfx
-		EXPORT bgfx-config
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} )
-	install( DIRECTORY ${BGFX_DIR}/include DESTINATION . )
+			 EXPORT "${TARGETS_EXPORT_NAME}"
+			 LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+			 ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+			 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+			 INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
+	if( NOT BGFX_LIBRARY_TYPE MATCHES "SHARED" )
+		install( TARGETS bimg bx astc-encoder edtaa3 etc1 etc2 iqa squish nvtt pvrtc tinyexr
+				 EXPORT "${TARGETS_EXPORT_NAME}"
+				 LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+				 ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+				 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+				 INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+		)
+	endif()
+    if (BGFX_CONFIG_RENDERER_WEBGPU)
+		install( TARGETS webgpu
+				 EXPORT "${TARGETS_EXPORT_NAME}"
+				 LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+				 ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+				 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+				 INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+		)
+    endif()
 
 	# install export
 	install(
@@ -139,18 +181,27 @@ if( BGFX_INSTALL )
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/bgfxToolUtils.cmake
 		DESTINATION "${config_install_dir}")
 	if( BGFX_BUILD_TOOLS )
-		install( TARGETS shaderc
-			EXPORT bgfx-config
-			DESTINATION bin )
-		install( TARGETS geometryc
-			EXPORT bgfx-config
-			DESTINATION bin )
-		install( TARGETS texturec
-			EXPORT bgfx-config
-			DESTINATION bin )
-		install( TARGETS texturev
-			EXPORT bgfx-config
-			DESTINATION bin )
+		if (BGFX_BUILD_TOOLS_SHADER)
+			install( TARGETS shaderc
+				EXPORT "${TARGETS_EXPORT_NAME}"
+				DESTINATION "${CMAKE_INSTALL_BINDIR}" )
+		endif()
+		if (BGFX_BUILD_TOOLS_GEOMETRY)
+			install( TARGETS geometryc
+				EXPORT "${TARGETS_EXPORT_NAME}"
+				DESTINATION "${CMAKE_INSTALL_BINDIR}" )
+			install( TARGETS geometryv
+				EXPORT "${TARGETS_EXPORT_NAME}"
+				DESTINATION "${CMAKE_INSTALL_BINDIR}" )
+		endif()
+		if (BGFX_BUILD_TOOLS_TEXTURE)
+			install( TARGETS texturec
+				EXPORT "${TARGETS_EXPORT_NAME}"
+				DESTINATION "${CMAKE_INSTALL_BINDIR}" )
+			install( TARGETS texturev
+				EXPORT "${TARGETS_EXPORT_NAME}"
+				DESTINATION "${CMAKE_INSTALL_BINDIR}" )
+		endif()
 	endif()
 
 	# install examples
