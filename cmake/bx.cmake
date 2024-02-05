@@ -79,9 +79,7 @@ if ( WINDOWS_STORE )
 	target_compile_definitions( bx PRIVATE "_CRT_SECURE_NO_WARNINGS" )
 endif ()
 
-target_compile_definitions( bx PRIVATE "$<$<CONFIG:Debug>:BX_CONFIG_DEBUG=1>" )
-
-if (BGFX_CONFIG_DEBUG)
+if (BX_CONFIG_DEBUG)
 	target_compile_definitions( bx PUBLIC "BX_CONFIG_DEBUG=1" )
 else()
 	target_compile_definitions( bx PUBLIC "BX_CONFIG_DEBUG=0" )
