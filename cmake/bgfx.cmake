@@ -92,13 +92,11 @@ if( MSVC )
 endif()
 
 # Add debug config required in bx headers since bx is private
-target_compile_definitions( bgfx PRIVATE "$<$<CONFIG:Debug>:BGFX_CONFIG_DEBUG=1>" "BGFX_CONFIG_MULTITHREADED=$<BOOL:${BGFX_CONFIG_MULTITHREADED}>")
-if (BGFX_CONFIG_DEBUG)
+if (BX_CONFIG_DEBUG)
     target_compile_definitions( bgfx PUBLIC "BX_CONFIG_DEBUG=1" )
 else()
     target_compile_definitions( bgfx PUBLIC "BX_CONFIG_DEBUG=0" )
 endif()
-
 
 # directx-headers
 set (DIRECTX_HEADERS)
